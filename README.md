@@ -1,5 +1,6 @@
 ## How to install
-* upload extension folder onto chrome
+* install Docker
+* upload extension folder at chrome://extension
 
 ## How to run
 ```
@@ -9,6 +10,9 @@ python3 app.py
 ```
 
 ## How to read mongo logs
-`docker exec -it <container name or id> bin/bash`
+```
+docker ps
+docker exec -it <container name or id> bin/bash
+```
 
 

@@ -33,7 +33,7 @@ def run():
             return key == 'title' or key == 'updated_at' or key == 'id' or key == '_id';
         # insert element into the database
         issues.insert_one({key:val for key, val in elem.items() if is_title_id_updated(key)})
-    return "hi"
+    return jsonify({"message": "ok"})
 
 @app.route('/', methods=['GET'])
 @cross_origin()

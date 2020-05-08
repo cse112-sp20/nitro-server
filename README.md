@@ -9,6 +9,6 @@ python3 app.py
 ```
 
 ## How to read mongo logs
-docker exec -it <container name or id> bin/bash
+`docker exec -it <container name or id> bin/bash`
 
 

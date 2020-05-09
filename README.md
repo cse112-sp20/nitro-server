@@ -10,7 +10,6 @@ python3 app.py
 ```
 
 ## How to access mongo logs
-### Make sure mongo contiainer is running
 ```
 docker ps
 docker exec -it <container name or id> bin/bash

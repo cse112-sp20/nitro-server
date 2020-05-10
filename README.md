@@ -19,7 +19,8 @@ docker exec -it <container name or id> bin/bash
 ![image](https://user-images.githubusercontent.com/39757882/81496104-eafea600-9269-11ea-8780-391b62cc7c41.png)
 
 ## Authentication
-![image](https://user-images.githubusercontent.com/39757882/81512856-d5749500-92d8-11ea-9173-0488f9db3354.png)
+
+![image](https://user-images.githubusercontent.com/39757882/81513016-0c977600-92da-11ea-95ba-a236b9cafed3.png)
 
 Basecamp API only supports OAuth 2.0 for authentication so we will be using pythons Oauth_lib library. The typical Workflow for authentication will be
 1. Get Authorized by Basecamp servers by sending user_id, user_secret, and redirect URI (This involves getting a special code)

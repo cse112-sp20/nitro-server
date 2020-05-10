@@ -18,13 +18,7 @@ docker exec -it <container name or id> bin/bash
 ## Database Schema
 ![image](https://user-images.githubusercontent.com/39757882/81496104-eafea600-9269-11ea-8780-391b62cc7c41.png)
 
-### Common Issues
-- [Errno 48] Address already in use
-```
- ps -fA | grep python
- kill <process id>
-```
-### Authentication
+## Authentication
 ![image](https://user-images.githubusercontent.com/39757882/81512856-d5749500-92d8-11ea-9173-0488f9db3354.png)
 
 Basecamp API only supports OAuth 2.0 for authentication so we will be using pythons Oauth_lib library. The typical Workflow for authentication will be

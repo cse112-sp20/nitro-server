@@ -17,3 +17,10 @@ docker exec -it <container name or id> bin/bash
 
 ## Database Schema
 ![image](https://user-images.githubusercontent.com/39757882/81496104-eafea600-9269-11ea-8780-391b62cc7c41.png)
+
+### Common Issues
+- [Errno 48] Address already in use
+```
+ ps -fA | grep python
+ kill <process id>
+```

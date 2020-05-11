@@ -16,7 +16,7 @@ docker exec -it <container name or id> bin/bash
 ```
 
 ## Database Schema
-![image](https://user-images.githubusercontent.com/39757882/81496104-eafea600-9269-11ea-8780-391b62cc7c41.png)
+![image](https://user-images.githubusercontent.com/39757882/81515583-a0bd0980-92e9-11ea-9ca8-2e9e5d311a35.png)
 
 ## Authentication
 

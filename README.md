@@ -3,6 +3,8 @@
 * install python
 
 ## How to run server and database
+Add the .env file from slack into the directory with app.py. The .env file will contain all of our api credentials (We don't want to upload this stuff to git)
+
 ```
 sudo docker run -d -p 27017:27017 -v ~/data:/data/db mongo
 pip3 install requirements.txt

@@ -5,7 +5,7 @@ Module to interface with Basecamp api. Used to instantiate endpoints and token
 import json
 import requests
 
-class Basecamp:
+class Basecamp(object):
     """Object used to interact with basecamp api"""
     def __init__(self, auth_token, acc_id):
 

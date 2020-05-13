@@ -1,5 +1,4 @@
 # pylint: disable=line-too-long
-# pylint: disable=import-error
 """
 Entry point for application
 """

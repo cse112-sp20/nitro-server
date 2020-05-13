@@ -8,7 +8,7 @@ import requests
 class Basecamp:
     """Object used to interact with basecamp api"""
     def __init__(self, auth_token, acc_id):
-    
+
         # Set authentication parameters
         self.auth_token = auth_token.decode()
         self.acc_id = acc_id
@@ -16,6 +16,7 @@ class Basecamp:
 
         # Basecamp endpoints
         self.base_endpoint = "https://3.basecampapi.com/{}/projects.json".format(self.acc_id)
+        self.complete_endpoint = 'https://3.basecampapi.com/{}/buckets/{}/todos/{}/completion.json'
 
     def json_dump(self):
         """
@@ -112,12 +113,12 @@ class Basecamp:
         """
         Makes a post request to Basecamp api to complete a todo
         """
-        complete_todo_endpoint = 'https://3.basecampapi.com/{}/buckets/{}/todos/{}/completion.json'.format(self.acc_id, project_id, todo_id)
+        complete_todo_endpoint = self.complete_endpoint.format(self.acc_id, project_id, todo_id)
         post_response = requests.post(complete_todo_endpoint, headers=self.header)
         if post_response.status_code != 204:
             raise Exception("bad requests")
-        return {"success" : "ok" }
-        
+        return {"success" : "ok"}
+
     @staticmethod
     def calculate_points():
         """ Cacluate the points for each team"""

@@ -4,3 +4,4 @@ pymongo
 wheel
 requests
 flask_cors
+FLask-Session

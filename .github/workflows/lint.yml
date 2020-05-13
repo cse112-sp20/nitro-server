@@ -30,6 +30,6 @@ jobs:
       - name: Run Pylint
         uses: fylein/python-pylint-github-action@v1
         with:
-          args: pip3 install -r requirements.txt && pylint . 
+          args: pip3 install -r requirements.txt && pylint --rcfile=.pylintrc . 
 
 

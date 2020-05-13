@@ -2,3 +2,6 @@
 *.pyc
 /venv
 __pycache__/
+workspace.code-workspace
+*.swp
+/.vscode

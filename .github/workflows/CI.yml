@@ -24,3 +24,5 @@ jobs:
         uses: GabrielBB/xvfb-action@v1.0
         with:
           run: npm test
+      - name: Testing output
+        run: echo "TEST OUTPUT FROM CI.YML"

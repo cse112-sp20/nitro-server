@@ -1,6 +1,6 @@
 import os
 import requests
-from flask import Flask, request, session, redirect
+from flask import Flask, request, session, redirect, abort
 from dotenv import load_dotenv
 
 """
@@ -18,6 +18,9 @@ redirect_uri = os.environ.get('REDIRECT_URI')
 """
 Use this route to get redirected to basecamp
 """
+import clientendpoints
+
+
 @app.route('/login')
 def login():
     authorization_url = 'https://launchpad.37signals.com/authorization/new?type=web_server&client_id={}&redirect_uri={}'.format(client_id, redirect_uri)

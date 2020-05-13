@@ -17,6 +17,18 @@ docker ps
 docker exec -it <container name or id> bin/bash
 ```
 
+## API
+At current time of writing the backend supports three endpoints
+
+`GET /tasks` will return a json dump of basecamp following the schema below and return `200` on success
+
+`POST /complete?project=$PROJECT_ID&task=$TASK_ID` will mark the task with `$TASK_ID` from project `$PROJECT_ID` as complete and return a `204` on success
+
+`GET /login` will redirect you to basecamp for authentication and then redirect you back
+
+## API Json Schema
+
+
 ## Database Schema
 ![image](https://user-images.githubusercontent.com/39757882/81515583-a0bd0980-92e9-11ea-9ca8-2e9e5d311a35.png)
 
@@ -29,8 +41,6 @@ Basecamp API only supports OAuth 2.0 for authentication so we will be using pyth
 2. Request Authentication Token (After getting the code, we will exchange it for an auth token)
 3. Save Token into our cache. We will be using MongoDB
 4. use Auth Token to make requests to basecamp servers
-
-Below is a code snippet showing what this workflow will look like:
 
 
 

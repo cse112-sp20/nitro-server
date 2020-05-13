@@ -1,0 +1,27 @@
+{
+  "name": "nitro-server",
+  "version": "1.0.0",
+  "description": "* install Docker\r * install python",
+  "main": "index.js",
+  "dependencies": {
+    "stylelint-config-primer": "^9.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.0.0",
+    "eslint-plugin-react": "^7.19.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cse112-sp20/nitro-server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cse112-sp20/nitro-server/issues"
+  },
+  "homepage": "https://github.com/cse112-sp20/nitro-server#readme"
+}

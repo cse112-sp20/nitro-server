@@ -1,4 +1,5 @@
-#pylint: disable=line-too-long
+# pylint: disable=line-too-long
+# pylint: disable=import-error
 """
 Entry point for application
 """
@@ -8,9 +9,9 @@ from flask import Flask, request, session, redirect, jsonify
 from dotenv import load_dotenv
 from Basecamp import Basecamp
 
-#Configurations
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'shh'
+# Configurations
+APP = Flask(__name__)
+APP.config['SECRET_KEY'] = 'shh'
 load_dotenv()
 
 # Enviornment Variables
@@ -19,11 +20,11 @@ CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
 REDIRECT_URI = os.environ.get('REDIRECT_URI')
 ACCOUNT_ID = os.environ.get('ACCOUNT_ID')
 
-#Endpoints
+# Endpoints
 AUTH_BASE = 'https://launchpad.37signals.com/authorization/new?type=web_server&client_id={}&redirect_uri={}'
 TOKEN_BASE = 'https://launchpad.37signals.com/authorization/token?type=web_server&client_id={}&redirect_uri={}&client_secret={}&code={}'
-  
-@app.route('/login')
+
+@APP.route('/login')
 def login():
     """
     Logs the user in and stores a new authentication token in their session
@@ -31,7 +32,7 @@ def login():
     authorization_url = AUTH_BASE.format(CLIENT_ID, REDIRECT_URI)
     return redirect(authorization_url), 302
 
-@app.route('/tasks')
+@APP.route('/tasks')
 def get_task():
     """
     Returns json dump of all of basecamp data
@@ -41,7 +42,7 @@ def get_task():
     basecamp = Basecamp(session.get('AUTH_TOKEN'), ACCOUNT_ID)
     return jsonify(basecamp.json_dump())
 
-@app.route('/complete', methods=['POST', 'GET'])
+@APP.route('/complete', methods=['POST', 'GET'])
 def complete_task():
     """
     Marks a task as complete
@@ -64,7 +65,7 @@ def complete_task():
     return "good", 200
 
 # Login route gets redirected here
-@app.route('/get_token', methods=['GET'])
+@APP.route('/get_token', methods=['GET'])
 def get_token():
     """
     redirect uri to get the auth token
@@ -80,4 +81,4 @@ def get_token():
     return "Failure"
 
 if __name__ == '__main__':
-    app.run('localhost', debug=True)
+    APP.run('localhost', debug=True)

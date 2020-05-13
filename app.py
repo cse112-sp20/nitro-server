@@ -51,7 +51,7 @@ def complete_task():
         return redirect('/login')
 
     # Get the id of the todo item we want to delete and the id of the project
-    todo_id = request.args.get('todo')
+    todo_id = request.args.get('task')
     project_id = request.args.get('project')
 
     # If either one is not give then return 400

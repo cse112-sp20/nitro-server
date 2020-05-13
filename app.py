@@ -22,6 +22,7 @@ ACCOUNT_ID = os.environ.get('ACCOUNT_ID')
 #Endpoints
 AUTH_BASE = 'https://launchpad.37signals.com/authorization/new?type=web_server&client_id={}&redirect_uri={}'
 TOKEN_BASE = 'https://launchpad.37signals.com/authorization/token?type=web_server&client_id={}&redirect_uri={}&client_secret={}&code={}'
+  
 @app.route('/login')
 def login():
     """

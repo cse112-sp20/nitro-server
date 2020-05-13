@@ -1,20 +1,35 @@
 ## How to install backend
-* install Docker
-* install python
-
-## How to run server and database
-Add the .env file from slack into the directory with app.py. The .env file will contain all of our api credentials (We don't want to upload this stuff to git)
+* Install Docker
+* Copy .env file from slack and put it in same directory as app.py
+* initialize a virtual enviornment
+```
+pip3 install virtualenv
+virtualenv venv
+```
+* start virtual enviornment and install dependencies
 
 ```
+source venv/bin/activate
+pip3 install requirments.txt
+```
+
+* Start Mongo Docker container
+```
 sudo docker run -d -p 27017:27017 -v ~/data:/data/db mongo
-pip3 install requirements.txt
+```
+
+## How to run server and database
+
+```
+
 python3 app.py
 ```
 
-## How to access mongo logs
+### How to access mongo shell
 ```
 docker ps
 docker exec -it <container name or id> bin/bash
+mongo
 ```
 
 ## API

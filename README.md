@@ -3,14 +3,13 @@
 * Copy .env file from slack and put it in same directory as app.py
 * initialize a virtual enviornment
 ```
-pip3 install virtualenv
-virtualenv venv
+python3 -m venv venv
 ```
 * start virtual enviornment and install dependencies
 
 ```
 source venv/bin/activate
-pip3 install requirments.txt
+pip3 install -r requirments.txt
 ```
 
 * Start Mongo Docker container
@@ -18,10 +17,9 @@ pip3 install requirments.txt
 sudo docker run -d -p 27017:27017 -v ~/data:/data/db mongo
 ```
 
-## How to run server and database
+## How to run server
 
 ```
-
 python3 app.py
 ```
 

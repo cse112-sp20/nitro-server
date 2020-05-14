@@ -1,5 +1,5 @@
 import json
-from __main__ import app
+from __main__ import APP 
 
 data = {'Team':'Nitro', 'Name': 'Joe', 'Due_date' : '05/14/20',
         'assigned_to' : 'fill', 'Notes' : "please work", 'point' : 12}

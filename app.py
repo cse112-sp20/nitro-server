@@ -4,7 +4,7 @@ Entry point for application
 """
 import os
 import requests
-from flask import Flask, request, session, redirect, jsonify
+from flask import Flask, request, session, redirect, jsonify, url_for
 from dotenv import load_dotenv
 from Basecamp import Basecamp
 
@@ -22,6 +22,12 @@ ACCOUNT_ID = os.environ.get('ACCOUNT_ID')
 # Endpoints
 AUTH_BASE = 'https://launchpad.37signals.com/authorization/new?type=web_server&client_id={}&redirect_uri={}'
 TOKEN_BASE = 'https://launchpad.37signals.com/authorization/token?type=web_server&client_id={}&redirect_uri={}&client_secret={}&code={}'
+
+@APP.route('/')
+def home():
+    if 'AUTH_TOKEN' in session:
+        return "logged in"
+    return "sad boi"
 
 @APP.route('/login')
 def login():
@@ -76,8 +82,13 @@ def get_token():
         token = token_response.json()['access_token'].encode('ascii', 'replace') #The Access token right here
         session['AUTH_TOKEN'] = token
         base_camp = Basecamp(token, ACCOUNT_ID)
-        return jsonify(base_camp.json_dump())
-    return "Failure"
+        return redirect(url_for('home'))
+    return "ima sad boi"
+
+@APP.route('/logout')
+def logout():
+    session.pop('AUTH_TOKEN', None)
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     APP.run('localhost', debug=True)

@@ -39,6 +39,8 @@ At current time of writing the backend supports three endpoints
 
 `GET /login` will redirect you to basecamp for authentication and then redirect you back
 
+'GET /logout` will log you out and clear your session from the browser
+
 ## API Json Schema
 
 ![C5285938-07BB-40B4-AC9E-FF90A1D9C155](https://user-images.githubusercontent.com/39757882/81820185-22c55200-94e5-11ea-879c-66d1c6984e68.jpg)

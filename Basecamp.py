@@ -5,10 +5,10 @@ Module to interface with Basecamp api. Used to instantiate endpoints and token
 import json
 import requests
 import re
+from Database_Access_Object import Task
 
 # Gets the format (100)
 POINTS_REGEXP = "\(\\b(1?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\\b\)"
-
 # We only want to match the todos with (NITRO)
 NITRO_TODO_REGEXP = "\(NITRO\)"
 
@@ -22,9 +22,13 @@ class Basecamp():
         self.header = {"Authorization": "Bearer " + self.auth_token}
 
         # Basecamp endpoints
+        self.root_endpoint = "https://3.basecampapi.com"
         self.base_endpoint = "https://3.basecampapi.com/{}/projects.json".format(self.acc_id)
         self.complete_endpoint = 'https://3.basecampapi.com/{}/buckets/{}/todos/{}/completion.json'
-        self.points = 0
+        self.task_endpoint = self.root_endpoint + "/{}/buckets/{}/todos/{}.json"
+
+        # Database access objects
+        self.tasks = Task()
 
     def json_dump(self):
         """
@@ -38,7 +42,6 @@ class Basecamp():
         acc_obj = {}
         acc_obj['account_id'] = self.acc_id
         acc_obj['teams'] = self.get_teams(project_json)
-        acc_obj['points'] = self.points
         return acc_obj
 
     def get_teams(self, project_json):
@@ -50,7 +53,6 @@ class Basecamp():
         team_res = []
         for projects in project_json:
             if projects['purpose'] == 'team' :
-                points = 0
                 team = {}
                 team['name'] = projects['name']
                 team['project_id'] = projects['id']
@@ -60,6 +62,7 @@ class Basecamp():
                 team['task_list'] = self.get_task_list([item['url']
                                                         for item in projects['dock']
                                                         if item['name'] == 'todoset'][0])
+
                 team_res.append(team)
         return team_res
 
@@ -95,6 +98,9 @@ class Basecamp():
                 task_list_elem['parent_id'] = task_list['parent']['id']
                 task_list_elem['parent_project'] = task_list['bucket']['name']
                 task_list_elem['task'] = self.get_task(task_list['todos_url'])
+                # Sums up the points of each individual task
+                task_list_elem['points'] = self.get_points_available(task_list_elem['task'])
+                task_list_elem['points_completed'] = self.get_points_completed(task_list['id'])
                 result_list.append(task_list_elem)
         return result_list
 
@@ -120,20 +126,61 @@ class Basecamp():
 
             # returns "(number)"
             parsed = re.search(POINTS_REGEXP, todo['title'])
-            print("parsed = {} title = {}".format(parsed, task_item['title']))
             # Parses the results and adds it to the points
             if parsed:
                 task_item['points'] += int(parsed.group(1))
-                self.points += int(parsed.group(1))
             res.append(task_item)
         return res
+
+    def get_points_available(self, tasks):
+        """
+        @ param tasks: A list of task object
+        @ return number
+        """
+        points = 0
+        for task in tasks:
+            points += task['points']
+        return points
+
+    def get_points_completed(self, task_list_id):
+        """
+        returns the number of points that the team has completed
+        """
+        points = 0
+        tasks = self.tasks.get_all_task(task_list_id)
+        for task in tasks:
+            points += task['points']
+        return points
+
+    def parse_points(self, title):
+        """
+        Parses the points of the title of the todo must be in the form (0-255)
+        """
+        points = 0
+        parsed = re.search(POINTS_REGEXP, title) 
+        # Parses the results and adds it to the points
+        if parsed:
+            points += int(parsed.group(1))
+        return points
 
     def complete_task(self, project_id, todo_id):
         """
         Makes a post request to Basecamp api to complete a todo
         """
+        # Get task_list id so that we can store into the database
+        task_endpoint = self.task_endpoint.format(self.acc_id, project_id, todo_id)
+        task_res = requests.get(task_endpoint, headers=self.header)
+        if task_res.status_code != 200:
+            raise Exception("made bad request to get task meta data")
+        task_json = json.loads(task_res.content)
+        task_list_id = task_json['parent']['id']
+        points = self.parse_points(task_json['title'])
+
         complete_todo_endpoint = self.complete_endpoint.format(self.acc_id, project_id, todo_id)
         post_response = requests.post(complete_todo_endpoint, headers=self.header)
         if post_response.status_code != 204:
             raise Exception("bad requests")
+
+        # inserts the task into the datbase
+        self.tasks.insert_task(self.acc_id, points, todo_id, project_id, task_list_id)
         return {"success" : "ok"}

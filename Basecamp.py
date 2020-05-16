@@ -4,6 +4,13 @@ Module to interface with Basecamp api. Used to instantiate endpoints and token
 """
 import json
 import requests
+import re
+
+# Gets the format (100)
+POINTS_REGEXP = "\(\\b(1?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\\b\)"
+
+# We only want to match the todos with (NITRO)
+NITRO_TODO_REGEXP = "\(NITRO\)"
 
 class Basecamp():
     """Object used to interact with basecamp api"""
@@ -17,6 +24,7 @@ class Basecamp():
         # Basecamp endpoints
         self.base_endpoint = "https://3.basecampapi.com/{}/projects.json".format(self.acc_id)
         self.complete_endpoint = 'https://3.basecampapi.com/{}/buckets/{}/todos/{}/completion.json'
+        self.points = 0
 
     def json_dump(self):
         """
@@ -26,13 +34,11 @@ class Basecamp():
         # Gets the parent object of basecamp to parse
         project_response = requests.get(self.base_endpoint, headers=self.header)
 
-        if project_response.status_code != 200:
-            raise Exception("failed request")
-
         project_json = json.loads(project_response.content)
         acc_obj = {}
         acc_obj['account_id'] = self.acc_id
         acc_obj['teams'] = self.get_teams(project_json)
+        acc_obj['points'] = self.points
         return acc_obj
 
     def get_teams(self, project_json):
@@ -43,7 +49,8 @@ class Basecamp():
         """
         team_res = []
         for projects in project_json:
-            if projects['purpose'] == 'team':
+            if projects['purpose'] == 'team' :
+                points = 0
                 team = {}
                 team['name'] = projects['name']
                 team['project_id'] = projects['id']
@@ -53,7 +60,6 @@ class Basecamp():
                 team['task_list'] = self.get_task_list([item['url']
                                                         for item in projects['dock']
                                                         if item['name'] == 'todoset'][0])
-                team['points'] = self.calculate_points()
                 team_res.append(team)
         return team_res
 
@@ -80,14 +86,16 @@ class Basecamp():
 
         # Add tasklist objects
         for task_list in json.loads(task_list_response.content):
-            task_list_elem = {}
-            task_list_elem['task_list_id'] = task_list['id']
-            task_list_elem['description'] = task_list['description']
-            task_list_elem['task_list_name'] = task_list['name']
-            task_list_elem['parent_id'] = task_list['parent']['id']
-            task_list_elem['parent_project'] = task_list['bucket']['name']
-            task_list_elem['task'] = self.get_task(task_list['todos_url'])
-            result_list.append(task_list_elem)
+            # Only take the task_list with the (NITRO) tag in the title
+            if re.search(NITRO_TODO_REGEXP, task_list['name']):
+                task_list_elem = {}
+                task_list_elem['task_list_id'] = task_list['id']
+                task_list_elem['description'] = task_list['description']
+                task_list_elem['task_list_name'] = task_list['name']
+                task_list_elem['parent_id'] = task_list['parent']['id']
+                task_list_elem['parent_project'] = task_list['bucket']['name']
+                task_list_elem['task'] = self.get_task(task_list['todos_url'])
+                result_list.append(task_list_elem)
         return result_list
 
     def get_task(self, todos_url):
@@ -106,6 +114,17 @@ class Basecamp():
             task_item['status'] = todo['status']
             task_item['due_on'] = todo['due_on']
             task_item['assignees'] = todo['assignees']
+
+            #Parse the regular expression to get the number
+            task_item['points'] = 0
+
+            # returns "(number)"
+            parsed = re.search(POINTS_REGEXP, todo['title'])
+            print("parsed = {} title = {}".format(parsed, task_item['title']))
+            # Parses the results and adds it to the points
+            if parsed:
+                task_item['points'] += int(parsed.group(1))
+                self.points += int(parsed.group(1))
             res.append(task_item)
         return res
 
@@ -118,8 +137,3 @@ class Basecamp():
         if post_response.status_code != 204:
             raise Exception("bad requests")
         return {"success" : "ok"}
-
-    @staticmethod
-    def calculate_points():
-        """ Cacluate the points for each team"""
-        return 100 + 10

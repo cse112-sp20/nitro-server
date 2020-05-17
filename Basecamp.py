@@ -2,10 +2,12 @@
 """
 Module to interface with Basecamp api. Used to instantiate endpoints and token
 """
+import os
 import json
 import requests
 import re
 from Database_Access_Object import Task
+from dotenv import load_dotenv
 
 # Gets the format (100)
 POINTS_REGEXP = "\(\\b(1?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\\b\)"
@@ -20,6 +22,8 @@ class Basecamp():
         self.auth_token = auth_token.decode()
         self.acc_id = acc_id
         self.header = {"Authorization": "Bearer " + self.auth_token}
+        #self.project_id = os.environ.get('PROJECT_ID')
+        self.HOST = os.environ.get('HOST')
 
         # Basecamp endpoints
         self.root_endpoint = "https://3.basecampapi.com"
@@ -29,6 +33,8 @@ class Basecamp():
 
         # Database access objects
         self.tasks = Task()
+        
+        print("The auth token is ", auth_token)
 
     def json_dump(self):
         """
@@ -100,8 +106,11 @@ class Basecamp():
                 task_list_elem['task'] = self.get_task(task_list['todos_url'])
                 # Sums up the points of each individual task
                 task_list_elem['points'] = self.get_points_available(task_list_elem['task'])
-                task_list_elem['points_completed'] = self.get_points_completed(task_list['id'])
                 result_list.append(task_list_elem)
+
+        for task_list in result_list:
+            task_list['points_completed'] = self.get_points_completed(task_list['task_list_id'])
+
         return result_list
 
     def get_task(self, todos_url):
@@ -114,6 +123,9 @@ class Basecamp():
             raise Exception("Faled to get todo items")
         todo_list = json.loads(todo_response.content)
         for todo in todo_list:
+
+            self.tasks.remove(todo['id'])
+
             task_item = {}
             task_item['id'] = todo['id']
             task_item['title'] = todo['title']
@@ -184,3 +196,22 @@ class Basecamp():
         # inserts the task into the datbase
         self.tasks.insert_task(self.acc_id, points, todo_id, project_id, task_list_id)
         return {"success" : "ok"}
+
+    def init_webhook(self):
+        project_data = requests.get(self.base_endpoint, headers=self.header)
+
+        if project_data.status_code != 200:
+            raise Exception('cannot make request to get projects')
+        project_json = json.loads(project_data.content)
+            
+        # For some reason can't get webhooks to work to update the completed
+        for projects in project_json:
+            if projects['purpose'] == 'team' :
+                webhook_endpoint = 'https://3.basecampapi.com/{}/buckets/{}/webhooks.json'.format(self.acc_id, projects['id'])
+                header = self.header
+                header['Content-Type'] = 'application/json'
+                header['User-Agent'] = 'Freshbooks (http://freshbooks.com/contact.php)'
+                param = {'payload_url' : 'http://localhost:5000'}
+                r = requests.post(webhook_endpoint, headers=header, params=param)
+                print(r.status_code)
+                print(r.text)

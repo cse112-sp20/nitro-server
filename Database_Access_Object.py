@@ -25,12 +25,23 @@ class Task:
         """
         res = tasks.find_one({"todo_id": todo_id})
         if not res:
-            tasks.insert_one({"todo_id" : todo_id, "points" : points, "proj_id" : proj_id, "acc_id" : acc_id, 'task_list_id' : task_list_id})
+            tasks.insert({"todo_id" : todo_id, "points" : points, "proj_id" : proj_id, "acc_id" : acc_id, 'task_list_id' : task_list_id})
             return True
         return False
+
+    def find_one(self, todo_id):
+        """
+        Finds a completed to_do given a todo id
+        """
+        print('searching for ' + str(todo_id))
+        return tasks.find_one({'todo_id' : todo_id})
     
+    def remove(self, todo_id):
+        tasks.delete_one({'todo_id' : str(todo_id)})
+
     def get_all_task(self, task_list_id):
         """
+        gets all task associated with a task_list_id
         @ param taks_list_id the id of the taks list that you want to query from
         """
         return tasks.find({"task_list_id" : task_list_id})       

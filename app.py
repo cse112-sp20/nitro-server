@@ -28,9 +28,7 @@ TOKEN_BASE = 'https://launchpad.37signals.com/authorization/token?type=web_serve
 @APP.route('/')
 @cross_origin()
 def home():
-    if 'AUTH_TOKEN' in session:
-        return "logged in"
-    return jsonify({"status" : "not logged in"}), 200
+    return jsonify({"status": 200})
 
 @APP.route('/login')
 @cross_origin()
@@ -47,9 +45,9 @@ def get_task():
     """
     Returns json dump of all of basecamp data
     """
-    if 'AUTH_TOKEN' not in session:
-        return redirect('/login')
-    basecamp = Basecamp(session.get('AUTH_TOKEN'), ACCOUNT_ID)
+    token = request.headers.get('Authorization')
+    print("The token is " + token)
+    basecamp = Basecamp(token, ACCOUNT_ID)
     return jsonify(basecamp.json_dump())
 
 @APP.route('/complete', methods=['POST', 'GET'])
@@ -60,9 +58,7 @@ def complete_task():
     @param todo: id of the todo item to be completed
     @param proejct: id of the project todo is located in
     """
-    if 'AUTH_TOKEN' not in session:
-        return redirect('/login')
-
+    token = request.headers.get('Authorization')
     # Get the id of the todo item we want to delete and the id of the project
     todo_id = request.args.get('task')
     project_id = request.args.get('project')
@@ -71,7 +67,7 @@ def complete_task():
     if not todo_id or not project_id:
         return "bad request", 400
 
-    basecamp = Basecamp(session.get('AUTH_TOKEN'), ACCOUNT_ID)
+    basecamp = Basecamp(token, ACCOUNT_ID)
     basecamp.complete_task(project_id, todo_id)
     return "good", 200
 
@@ -85,14 +81,15 @@ def get_token():
     code = request.args.get('code')
     token_url = TOKEN_BASE.format(CLIENT_ID, REDIRECT_URI, CLIENT_SECRET, code)
     token_response = requests.post(token_url)
-    print("the toke nresponse is {}".format(token_response.status_code))
     if token_response.status_code == 200:
         token = token_response.json()['access_token'].encode('ascii', 'replace') #The Access token right here
+        """
         session['AUTH_TOKEN'] = token
         base_camp = Basecamp(token, ACCOUNT_ID)
         # base_camp.init_webhook()
-        return redirect(url_for('home'))
-    return "lit"
+        """
+        return jsonify({"Authorization" : token.decode("utf-8")})
+    return "bad request"
 
 @APP.route('/task_update_webhook', methods=['POST'])
 @cross_origin()

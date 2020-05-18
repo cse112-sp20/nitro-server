@@ -19,7 +19,7 @@ class Basecamp():
     def __init__(self, auth_token, acc_id):
 
         # Set authentication parameters
-        self.auth_token = auth_token.decode()
+        self.auth_token = auth_token
         self.acc_id = acc_id
         self.header = {"Authorization": "Bearer " + self.auth_token}
         #self.project_id = os.environ.get('PROJECT_ID')

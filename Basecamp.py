@@ -211,7 +211,7 @@ class Basecamp():
                 header = self.header
                 header['Content-Type'] = 'application/json'
                 header['User-Agent'] = 'Freshbooks (http://freshbooks.com/contact.php)'
-                param = {'payload_url' : 'http://localhost:5000'}
+                param = {'payload_url' : 'http://0.0.0.0:80'}
                 r = requests.post(webhook_endpoint, headers=header, params=param)
                 print(r.status_code)
                 print(r.text)

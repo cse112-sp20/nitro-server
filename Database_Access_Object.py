@@ -1,3 +1,4 @@
+# pylint: skip-file
 import pymongo
 import datetime
 from pymongo import MongoClient
@@ -46,6 +47,8 @@ class Task:
         @ param taks_list_id the id of the taks list that you want to query from
         """
         return tasks.find({"task_list_id" : task_list_id})       
+    def get_all(self):
+        return tasks.find() 
 
 
 class User:

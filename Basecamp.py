@@ -1,4 +1,5 @@
 # pylint: disable=invalid-name
+# pylint: skip-file
 """
 Module to interface with Basecamp api. Used to instantiate endpoints and token
 """
@@ -250,4 +251,14 @@ class Basecamp():
             raise Exception("bad request 204")
         # removes from the database
         self.tasks.remove(todo_id)
+
+    def uncomplete(self, project_id, todo_id):
+        endpoint = self.complete_endpoint.format(self.acc_id, project_id, todo_id)
+        r = requests.delete(endpoint, headers=self.header)
+        self.tasks.remove(int(todo_id))
+    
+    def uncomplete_all(self):
+        tasks = self.tasks.get_all()
+        for task in tasks:
+            self.uncomplete(task['proj_id'], task['todo_id'])
 

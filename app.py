@@ -1,4 +1,5 @@
 # pylint: disable=line-too-long
+# pylint: skip-file
 """
 Entry point for application
 """
@@ -115,6 +116,19 @@ def get_token():
         """
         return jsonify({"Authorization" : token.decode("utf-8")})
     return "bad request"
+
+@APP.route('/clear_completed', methods=['DELETE'])
+@cross_origin()
+def clear_completed():
+    """
+    Resets the completed tasks from the database
+    """
+    token = request.headers.get('Authorization')
+    if not token:
+        return "no Auth token found", 401
+    basecamp = Basecamp(token, ACCOUNT_ID)
+    basecamp.uncomplete_all()
+    return "uncompleted"
 
 @APP.route('/task_update_webhook', methods=['POST'])
 @cross_origin()

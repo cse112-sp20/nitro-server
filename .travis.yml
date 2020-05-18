@@ -13,4 +13,4 @@ script:
   - coverage run --source=. -m pytest
 
 after_success:
-  - codecov --token=1166cd1b04cfdaa7bfba14da3593336618837211
+  - codecov --token=10c3c033-d4a9-4116-8dce-267f87eafd7f

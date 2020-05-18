@@ -65,12 +65,16 @@ class Basecamp():
                 team['todoset_id'] = [item['id']
                                       for item in projects['dock']
                                       if item['name'] == 'todoset'][0]
+                """
                 team['task_list'] = self.get_task_list([item['url']
                                                         for item in projects['dock']
                                                         if item['name'] == 'todoset'][0])
-
+                """ 
+                task_list_items = self.get_task_list([item['url']
+                                                        for item in projects['dock']
+                                                        if item['name'] == 'todoset'][0])
                 # Consolidates the tasks into one giant array
-                consolidated_tasks = self.consolidate_tasks(team['task_list'])
+                consolidated_tasks = self.consolidate_tasks(task_list_items)
                 team['consolidated_tasks'] = consolidated_tasks[0]
                 team['points_required'] = consolidated_tasks[1]
                 team['points_completed'] = consolidated_tasks[2]
@@ -100,6 +104,7 @@ class Basecamp():
 
         # Add tasklist objects
         for task_list in json.loads(task_list_response.content):
+            print("task list " + task_list['name'])
             # Only take the task_list with the (NITRO) tag in the title
             if re.search(NITRO_TODO_REGEXP, task_list['name']):
                 task_list_elem = {}
@@ -128,7 +133,7 @@ class Basecamp():
             raise Exception("Faled to get todo items")
         todo_list = json.loads(todo_response.content)
         for todo in todo_list:
-
+            print("The todos are " + todo['title'])
             self.tasks.remove(todo['id'])
 
             task_item = {}

@@ -46,7 +46,8 @@ def get_task():
     Returns json dump of all of basecamp data
     """
     token = request.headers.get('Authorization')
-    print("The token is " + token)
+    if not token:
+        return "no Auth token found", 401
     basecamp = Basecamp(token, ACCOUNT_ID)
     return jsonify(basecamp.json_dump())
 
@@ -55,8 +56,9 @@ def delete_task():
     """
     Delete tasks
     """
-    if 'AUTH_TOKEN' not in session:
-        return redirect('login')
+    token = request.headers.get('Authorization')
+    if not token:
+        return "no Auth token found", 401
     
     # Get the id of the todo item we want to delete and the id of the project
     todo_id = request.args.get('task')
@@ -66,7 +68,7 @@ def delete_task():
     if not todo_id or not project_id:
         return "did not give task or project id", 400
 
-    basecamp = Basecamp(session.get('AUTH_TOKEN'), ACCOUNT_ID)
+    basecamp = Basecamp(token, ACCOUNT_ID)
     basecamp.delete_task(project_id, todo_id)
     return "hi" 
 
@@ -79,6 +81,9 @@ def complete_task():
     @param proejct: id of the project todo is located in
     """
     token = request.headers.get('Authorization')
+    if not token:
+        return "no Auth token found", 401
+
     # Get the id of the todo item we want to delete and the id of the project
     todo_id = request.args.get('task')
     project_id = request.args.get('project')

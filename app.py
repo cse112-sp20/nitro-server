@@ -47,6 +47,26 @@ def get_task():
     basecamp = Basecamp(session.get('AUTH_TOKEN'), ACCOUNT_ID)
     return jsonify(basecamp.json_dump())
 
+@APP.route('/delete', methods=['POST','GET'])
+def delete_task():
+    """
+    Delete tasks
+    """
+    if 'AUTH_TOKEN' not in session:
+        return redirect('login')
+    
+    # Get the id of the todo item we want to delete and the id of the project
+    todo_id = request.args.get('task')
+    project_id = request.args.get('project')
+    
+    # If either one is not give then return 400
+    if not todo_id or not project_id:
+        return "did not give task or project id", 400
+
+    basecamp = Basecamp(session.get('AUTH_TOKEN'), ACCOUNT_ID)
+    basecamp.delete_task(project_id, todo_id)
+    return "hi" 
+
 @APP.route('/complete', methods=['POST', 'GET'])
 def complete_task():
     """

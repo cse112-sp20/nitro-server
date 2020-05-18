@@ -30,7 +30,7 @@ class Basecamp():
         self.base_endpoint = "https://3.basecampapi.com/{}/projects.json".format(self.acc_id)
         self.complete_endpoint = 'https://3.basecampapi.com/{}/buckets/{}/todos/{}/completion.json'
         self.task_endpoint = self.root_endpoint + "/{}/buckets/{}/todos/{}.json"
-
+        self.delete_todo_endpoint = self.root_endpoint + "/" + self.acc_id + "/buckets/{}/recordings/{}/status/trashed.json"
         # Database access objects
         self.tasks = Task()
         
@@ -69,6 +69,11 @@ class Basecamp():
                                                         for item in projects['dock']
                                                         if item['name'] == 'todoset'][0])
 
+                # Consolidates the tasks into one giant array
+                consolidated_tasks = self.consolidate_tasks(team['task_list'])
+                team['consolidated_tasks'] = consolidated_tasks[0]
+                team['points_required'] = consolidated_tasks[1]
+                team['points_completed'] = consolidated_tasks[2]
                 team_res.append(team)
         return team_res
 
@@ -215,3 +220,29 @@ class Basecamp():
                 r = requests.post(webhook_endpoint, headers=header, params=param)
                 print(r.status_code)
                 print(r.text)
+
+    def consolidate_tasks(self, task_lists):
+        """
+        Helper method to flatten the multi level task-list into a single array of tasks
+        @ task_list an array of task_list objects
+        @ return a tuple where the first element is the flatted tasks, the second element is the points required, and the third elements is the points completed
+        """
+        # The flattened list containing all the tasks
+        res = []
+        points_required = 0
+        points_completed = 0
+        for task_list in task_lists:
+            points_required += task_list['points']
+            points_completed  += task_list['points_completed']
+            for tasks in task_list['task']:
+                res.append(tasks)
+        return (res, points_required, points_completed)
+
+    def delete_task(self, project_id, todo_id):
+        endpoint = self.delete_todo_endpoint.format(project_id, todo_id)
+        res = requests.put(endpoint, headers=self.header)
+        if res.status_code != 204:
+            raise Exception("bad request 204")
+        # removes from the database
+        self.tasks.remove(todo_id)
+

@@ -37,6 +37,7 @@ class Task:
         return tasks.find_one({'todo_id' : todo_id})
     
     def remove(self, todo_id):
+        assert isinstance(todo_id, int)
         tasks.delete_one({'todo_id' : str(todo_id)})
 
     def get_all_task(self, task_list_id):

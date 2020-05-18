@@ -7,11 +7,13 @@ import requests
 from flask import Flask, request, session, redirect, jsonify, url_for, abort
 from dotenv import load_dotenv
 from Basecamp import Basecamp
+from flask_cors import CORS, cross_origin
 
 # Configurations
 APP = Flask(__name__)
 APP.config['SECRET_KEY'] = 'shh'
 load_dotenv()
+cors = CORS(APP)
 
 # Enviornment Variables
 CLIENT_ID = os.environ.get('CLIENT_ID')
@@ -24,12 +26,14 @@ AUTH_BASE = 'https://launchpad.37signals.com/authorization/new?type=web_server&c
 TOKEN_BASE = 'https://launchpad.37signals.com/authorization/token?type=web_server&client_id={}&redirect_uri={}&client_secret={}&code={}'
 
 @APP.route('/')
+@cross_origin()
 def home():
     if 'AUTH_TOKEN' in session:
         return "logged in"
-    return "sad boi"
+    return jsonify({"status" : "not logged in"}), 200
 
 @APP.route('/login')
+@cross_origin()
 def login():
     """
     Logs the user in and stores a new authentication token in their session
@@ -38,6 +42,7 @@ def login():
     return redirect(authorization_url), 302
 
 @APP.route('/tasks')
+@cross_origin()
 def get_task():
     """
     Returns json dump of all of basecamp data
@@ -48,6 +53,7 @@ def get_task():
     return jsonify(basecamp.json_dump())
 
 @APP.route('/complete', methods=['POST', 'GET'])
+@cross_origin()
 def complete_task():
     """
     Marks a task as complete
@@ -71,6 +77,7 @@ def complete_task():
 
 # Login route gets redirected here
 @APP.route('/get_token', methods=['GET'])
+@cross_origin()
 def get_token():
     """
     redirect uri to get the auth token
@@ -88,13 +95,15 @@ def get_token():
     return "lit"
 
 @APP.route('/task_update_webhook', methods=['POST'])
+@cross_origin()
 def recieve_webhook():
     print("hello")
 
 @APP.route('/logout')
+@cross_origin()
 def logout():
     session.pop('AUTH_TOKEN', None)
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
-    APP.run('localhost', debug=True)
+    APP.run('localhost',  debug=True)

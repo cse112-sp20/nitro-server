@@ -1,3 +1,5 @@
+[Contribution Guide](https://github.com/cse112-sp20/nitro-server/wiki/Contributing-to-Nitro)
+
 ## How to install backend
 * Install Docker
 * Copy .env file from slack and put it in same directory as app.py

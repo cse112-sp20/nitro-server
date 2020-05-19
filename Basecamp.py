@@ -13,7 +13,7 @@ POINTS_REGEXP = "\(\\b(1?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\\b\)"
 # We only want to match the todos with (NITRO)
 NITRO_TODO_REGEXP = "\(NITRO\)"
 
-class Basecamp():
+class Basecamp:
     """Object used to interact with basecamp api"""
     def __init__(self, auth_token, acc_id):
 

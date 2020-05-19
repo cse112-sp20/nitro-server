@@ -3,12 +3,10 @@
 """
 Module to interface with Basecamp api. Used to instantiate endpoints and token
 """
-import os
 import json
 import re
 import requests
-from Database_Access_Object import Task
-from dotenv import load_dotenv
+from database_access_object import Task
 
 # Gets the format (100)
 POINTS_REGEXP = "\(\\b(1?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\\b\)"
@@ -20,16 +18,14 @@ class Basecamp():
     def __init__(self, auth_token, acc_id):
 
         # Set authentication parameters
-        self.auth_token = auth_token
         self.acc_id = acc_id
-        self.header = {"Authorization": "Bearer " + self.auth_token}
+        self.header = {"Authorization": "Bearer " + auth_token}
 
         # Requests endpoint
-        self.root_endpoint = "https://3.basecampapi.com"
         self.base_endpoint = "https://3.basecampapi.com/{}/projects.json".format(self.acc_id)
         self.complete_endpoint = 'https://3.basecampapi.com/{}/buckets/{}/todos/{}/completion.json'
-        self.task_endpoint = self.root_endpoint + "/{}/buckets/{}/todos/{}.json"
-        self.delete_todo_endpoint = self.root_endpoint + "/" + self.acc_id + "/buckets/{}/" \
+        self.task_endpoint = "https://3.basecampapi.com/{}/buckets/{}/todos/{}.json"
+        self.delete_todo_endpoint = "https://3.basecampapi.com/" + self.acc_id + "/buckets/{}/" \
                                     "recordings/{}/status/trashed.json"
         # Database access object
         self.tasks = Task()
@@ -98,7 +94,6 @@ class Basecamp():
 
         # Add tasklist objects
         for task_list in json.loads(task_list_response.content):
-            print("task list " + task_list['name'])
             # Only take the task_list with the (NITRO) tag in the title
             if re.search(NITRO_TODO_REGEXP, task_list['name']):
                 task_list_elem = {}
@@ -130,7 +125,6 @@ class Basecamp():
             raise Exception(str(todo_response.status_code))
         todo_list = json.loads(todo_response.content)
         for todo in todo_list:
-            print("The todos are " + todo['title'])
             self.tasks.remove(todo['id'])
 
             task_item = {}

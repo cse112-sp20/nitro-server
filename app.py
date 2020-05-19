@@ -4,10 +4,10 @@ Entry point for application
 """
 import os
 import requests
-from flask import Flask, request, session, redirect, jsonify, url_for, abort
+from flask import Flask, request, session, redirect, jsonify, url_for
 from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
-from Basecamp import Basecamp
+from basecamp import Basecamp
 
 
 # Configurations
@@ -55,7 +55,7 @@ def get_task():
     basecamp = Basecamp(token, ACCOUNT_ID)
     return jsonify(basecamp.json_dump())
 
-@APP.route('/delete', methods=['POST','GET'])
+@APP.route('/delete', methods=['POST', 'GET'])
 def delete_task():
     """
     Delete tasks
@@ -138,4 +138,4 @@ def logout():
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
-    APP.run('0.0.0.0',  port=80, debug=True)
+    APP.run('0.0.0.0', port=80, debug=True)

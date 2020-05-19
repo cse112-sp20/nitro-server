@@ -1,5 +1,8 @@
-import pymongo
-import datetime
+# pylint: disable=too-many-arguments
+# Disabling to many arguments because it is needed
+"""
+Objects used to make CRUD operations on the database
+"""
 from pymongo import MongoClient
 
 #Connect to MongoDB

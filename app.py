@@ -74,7 +74,7 @@ def delete_task():
 
     basecamp = Basecamp(token, ACCOUNT_ID)
     basecamp.delete_task(project_id, todo_id)
-    return "hi" 
+    return "hi"
 
 @APP.route('/complete', methods=['POST', 'GET'])
 @cross_origin()

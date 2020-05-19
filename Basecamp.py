@@ -63,7 +63,7 @@ class Basecamp():
                                                       for item in projects['dock']
                                                       if item['name'] == 'todoset'][0])
                 # Consolidates the tasks into one giant array
-                consolidated_tasks = self.consolidate_tasks(task_list_items)
+                consolidated_tasks = consolidate_tasks(task_list_items)
                 team['consolidated_tasks'] = consolidated_tasks[0]
                 team['points_required'] = consolidated_tasks[1]
                 team['points_completed'] = consolidated_tasks[2]
@@ -104,7 +104,7 @@ class Basecamp():
                 task_list_elem['parent_project'] = task_list['bucket']['name']
                 task_list_elem['task'] = self.get_task(task_list['todos_url'])
                 # Sums up the points of each individual task
-                task_list_elem['points'] = self.get_points_available(task_list_elem['task'])
+                task_list_elem['points'] = get_points_available(task_list_elem['task'])
                 result_list.append(task_list_elem)
 
         for task_list in result_list:
@@ -145,17 +145,6 @@ class Basecamp():
             res.append(task_item)
         return res
 
-    def get_points_available(self, tasks):
-        """
-        Gets all the points available in a task list
-        @ param tasks([dict]): A list of task object
-        @ return (int)
-        """
-        points = 0
-        for task in tasks:
-            points += task['points']
-        return points
-
     def get_points_completed(self, task_list_id):
         """
         returns the number of points that the team has completed
@@ -166,19 +155,6 @@ class Basecamp():
         tasks = self.tasks.get_all_task(task_list_id)
         for task in tasks:
             points += task['points']
-        return points
-
-    def parse_points(self, title):
-        """
-        Parses the points of the title of the todo must be in the form (0-255)
-        @ param title (str): The string of the todo name
-        @ returns int: points parsed
-        """
-        points = 0
-        parsed = re.search(POINTS_REGEXP, title) 
-        # Parses the results and adds it to the points
-        if parsed:
-            points += int(parsed.group(1))
         return points
 
     def complete_task(self, project_id, todo_id):
@@ -192,7 +168,7 @@ class Basecamp():
             raise Exception(str(task_res.status_code))
         task_json = json.loads(task_res.content)
         task_list_id = task_json['parent']['id']
-        points = self.parse_points(task_json['title'])
+        points = parse_points(task_json['title'])
 
         complete_todo_endpoint = self.complete_endpoint.format(self.acc_id, project_id, todo_id)
         post_response = requests.post(complete_todo_endpoint, headers=self.header)
@@ -214,7 +190,7 @@ class Basecamp():
         project_json = json.loads(project_data.content)
 
         for projects in project_json:
-            if projects['purpose'] == 'team' :
+            if projects['purpose'] == 'team':
                 webhook_endpoint = 'https://3.basecampapi.com/{}" \
                                     "/buckets/{}/webhooks.json'.format(self.acc_id, projects['id'])
                 header = self.header
@@ -222,24 +198,6 @@ class Basecamp():
                 header['User-Agent'] = 'Freshbooks (http://freshbooks.com/contact.php)'
                 param = {'payload_url' : 'http://0.0.0.0:80'}
                 requests.post(webhook_endpoint, headers=header, params=param)
-
-    def consolidate_tasks(self, task_lists):
-        """
-        Helper method to flatten the multi level task-list into a single array of tasks
-        @ task_list ([dict]): an array of task_list objects
-        @ return tuple: First element is the flatted tasks, the second element is the points
-        required, and the third elements is the points completed
-        """
-        # The flattened list containing all the tasks
-        res = []
-        points_required = 0
-        points_completed = 0
-        for task_list in task_lists:
-            points_required += task_list['points']
-            points_completed += task_list['points_completed']
-            for tasks in task_list['task']:
-                res.append(tasks)
-        return (res, points_required, points_completed)
 
     def delete_task(self, project_id, todo_id):
         """
@@ -274,3 +232,46 @@ class Basecamp():
         tasks = self.tasks.get_all()
         for task in tasks:
             self.uncomplete(task['proj_id'], task['todo_id'])
+
+def consolidate_tasks(task_lists):
+    """
+    Helper method to flatten the multi level task-list into a single array of tasks
+    @ task_list ([dict]): an array of task_list objects
+    @ return tuple: First element is the flatted tasks, the second element is the points
+    required, and the third elements is the points completed
+    """
+    # The flattened list containing all the tasks
+    res = []
+    points_required = 0
+    points_completed = 0
+    for task_list in task_lists:
+        points_required += task_list['points']
+        points_completed += task_list['points_completed']
+        for tasks in task_list['task']:
+            res.append(tasks)
+    return (res, points_required, points_completed)
+
+def get_points_available(tasks):
+    """
+    Gets all the points available in a task list
+    @ param tasks([dict]): A list of task object
+    @ return (int)
+    """
+    points = 0
+    for task in tasks:
+        points += task['points']
+    return points
+
+def parse_points(title):
+    """
+    Parses the points of the title of the todo must be in the form (0-255)
+    @ param title (str): The string of the todo name
+    @ returns int: points parsed
+    """
+    points = 0
+    parsed = re.search(POINTS_REGEXP, title)
+    # Parses the results and adds it to the points
+    if parsed:
+        points += int(parsed.group(1))
+    return points
+    

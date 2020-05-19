@@ -1,3 +1,5 @@
+# pylint: disable=anomalous-backslash-in-string
+# Disabling anomalous-backslash-in-string because it is needed for regexp
 """
 Module to interface with Basecamp api. Used to instantiate endpoints and token
 """
@@ -54,7 +56,7 @@ class Basecamp():
         """
         team_res = []
         for projects in project_json:
-            if projects['purpose'] == 'team' :
+            if projects['purpose'] == 'team':
                 team = {}
                 team['name'] = projects['name']
                 team['project_id'] = projects['id']
@@ -240,7 +242,7 @@ class Basecamp():
         points_completed = 0
         for task_list in task_lists:
             points_required += task_list['points']
-            points_completed  += task_list['points_completed']
+            points_completed += task_list['points_completed']
             for tasks in task_list['task']:
                 res.append(tasks)
         return (res, points_required, points_completed)

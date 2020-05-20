@@ -47,7 +47,7 @@ At current time of writing the backend supports three endpoints
 
 ## API Json Schema
 
-![C5285938-07BB-40B4-AC9E-FF90A1D9C155](https://user-images.githubusercontent.com/39757882/81820185-22c55200-94e5-11ea-879c-66d1c6984e68.jpg)
+![image](https://user-images.githubusercontent.com/39757882/82402699-f5f7ca00-9a11-11ea-9cdd-d14129ff6cde.png)
 
 ## Database Schema
 ![image](https://user-images.githubusercontent.com/39757882/81515583-a0bd0980-92e9-11ea-9ca8-2e9e5d311a35.png)

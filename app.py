@@ -121,7 +121,7 @@ def get_token():
         auth.delete_many({});
         auth.insert_one({"Auth" : token.decode("utf-8")}) 
         #return jsonify({"Authorization" : token.decode("utf-8")})
-        return "GOOOOOOOOOOOOOOOOOD"
+        return "logged in"
     return "bad request"
 
 @APP.route('/clear_completed', methods=['DELETE'])

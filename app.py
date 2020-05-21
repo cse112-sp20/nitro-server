@@ -9,6 +9,14 @@ from flask import Flask, request, session, redirect, jsonify, url_for, abort
 from dotenv import load_dotenv
 from Basecamp import Basecamp
 from flask_cors import CORS, cross_origin
+from pymongo import MongoClient
+
+# Initializing the database access objects
+client = MongoClient("mongodb://0.0.0.0:27017")
+db = client.Basecamp
+#Create collections within db
+auth = db.Auth
+
 
 # Configurations
 APP = Flask(__name__)
@@ -46,7 +54,7 @@ def get_task():
     """
     Returns json dump of all of basecamp data
     """
-    token = request.headers.get('Authorization')
+    token = auth.find()[0]["Auth"]
     if not token:
         return "no Auth token found", 401
     basecamp = Basecamp(token, ACCOUNT_ID)
@@ -81,7 +89,7 @@ def complete_task():
     @param todo: id of the todo item to be completed
     @param proejct: id of the project todo is located in
     """
-    token = request.headers.get('Authorization')
+    token = auth.find()[0]["Auth"]
     if not token:
         return "no Auth token found", 401
 
@@ -107,14 +115,13 @@ def get_token():
     code = request.args.get('code')
     token_url = TOKEN_BASE.format(CLIENT_ID, REDIRECT_URI, CLIENT_SECRET, code)
     token_response = requests.post(token_url)
+    print(token_response)
     if token_response.status_code == 200:
         token = token_response.json()['access_token'].encode('ascii', 'replace') #The Access token right here
-        """
-        session['AUTH_TOKEN'] = token
-        base_camp = Basecamp(token, ACCOUNT_ID)
-        # base_camp.init_webhook()
-        """
-        return jsonify({"Authorization" : token.decode("utf-8")})
+        auth.delete_many({});
+        auth.insert_one({"Auth" : token.decode("utf-8")}) 
+        #return jsonify({"Authorization" : token.decode("utf-8")})
+        return "GOOOOOOOOOOOOOOOOOD"
     return "bad request"
 
 @APP.route('/clear_completed', methods=['DELETE'])
@@ -123,6 +130,7 @@ def clear_completed():
     """
     Resets the completed tasks from the database
     """
+    #token = request.headers.get('Authorization')
     token = request.headers.get('Authorization')
     if not token:
         return "no Auth token found", 401
@@ -138,8 +146,8 @@ def recieve_webhook():
 @APP.route('/logout')
 @cross_origin()
 def logout():
-    session.pop('AUTH_TOKEN', None)
-    return redirect(url_for('home'))
+    auth.delete_many({})
+    return "logged out"
 
 if __name__ == '__main__':
     APP.run('0.0.0.0',  port=80, debug=True)

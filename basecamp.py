@@ -67,6 +67,7 @@ class Basecamp:
                 team['consolidated_tasks'] = consolidated_tasks[0]
                 team['points_required'] = consolidated_tasks[1]
                 team['points_completed'] = consolidated_tasks[2]
+                team['completed_tasks'] = self.tasks.get_all_task_with_projid(team['project_id'])
                 team_res.append(team)
         return team_res
 
@@ -241,15 +242,15 @@ def consolidate_tasks(task_lists):
     required, and the third elements is the points completed
     """
     # The flattened list containing all the tasks
-    res = []
+    tasks_todo = []
     points_required = 0
     points_completed = 0
     for task_list in task_lists:
         points_required += task_list['points']
         points_completed += task_list['points_completed']
         for tasks in task_list['task']:
-            res.append(tasks)
-    return (res, points_required, points_completed)
+            tasks_todo.append(tasks)
+    return (tasks_todo, points_required, points_completed)
 
 def get_points_available(tasks):
     """

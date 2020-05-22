@@ -4,12 +4,18 @@ Entry point for application
 """
 import os
 import requests
-from flask import Flask, request, session, redirect, jsonify, url_for
+from flask import Flask, request, redirect, jsonify
 from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
+from pymongo import MongoClient
 from basecamp import Basecamp
 
-#test
+# Initializing the database access objects
+client = MongoClient("mongodb://0.0.0.0:27017")
+db = client.Basecamp
+#Create collections within db
+auth = db.Auth
+
 # Configurations
 APP = Flask(__name__)
 APP.config['SECRET_KEY'] = 'shh'
@@ -49,7 +55,7 @@ def get_task():
     """
     Returns json dump of all of basecamp data
     """
-    token = request.headers.get('Authorization')
+    token = auth.find()[0]["Auth"]
     if not token:
         return "no Auth token found", 401
     basecamp = Basecamp(token, ACCOUNT_ID)
@@ -61,7 +67,7 @@ def delete_task():
     """
     Delete tasks
     """
-    token = request.headers.get('Authorization')
+    token = auth.find()[0]["Auth"]
     if not token:
         return "no Auth token found", 401
 
@@ -74,7 +80,7 @@ def delete_task():
         return "did not give task or project id", 400
 
     basecamp = Basecamp(token, ACCOUNT_ID)
-    basecamp.delete_task(project_id, todo_id)
+    basecamp.delete_task(project_id, int(todo_id))
     return "hi"
 
 @APP.route('/complete', methods=['POST', 'GET'])
@@ -85,7 +91,7 @@ def complete_task():
     @param todo: id of the todo item to be completed
     @param proejct: id of the project todo is located in
     """
-    token = request.headers.get('Authorization')
+    token = auth.find()[0]["Auth"]
     if not token:
         return "no Auth token found", 401
 
@@ -111,9 +117,13 @@ def get_token():
     code = request.args.get('code')
     token_url = TOKEN_BASE.format(CLIENT_ID, REDIRECT_URI, CLIENT_SECRET, code)
     token_response = requests.post(token_url)
+    print(token_response)
     if token_response.status_code == 200:
         token = token_response.json()['access_token'].encode('ascii', 'replace') #The Access token right here
-        return jsonify({"Authorization" : token.decode("utf-8")})
+        auth.delete_many({})
+        auth.insert_one({"Auth" : token.decode("utf-8")})
+        #return jsonify({"Authorization" : token.decode("utf-8")})
+        return "logged in"
     return "bad request"
 
 @APP.route('/clear_completed', methods=['DELETE'])
@@ -122,6 +132,7 @@ def clear_completed():
     """
     Resets the completed tasks from the database
     """
+    #token = request.headers.get('Authorization')
     token = request.headers.get('Authorization')
     if not token:
         return "no Auth token found", 401
@@ -133,10 +144,10 @@ def clear_completed():
 @cross_origin()
 def logout():
     """
-    logs the current user out of the session
+    logout route that deletes every auth token from basecamp
     """
-    session.pop('AUTH_TOKEN', None)
-    return redirect(url_for('home'))
+    auth.delete_many({})
+    return "logged out"
 
 if __name__ == '__main__':
     APP.run('0.0.0.0', port=80, debug=True)

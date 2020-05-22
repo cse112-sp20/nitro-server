@@ -64,7 +64,6 @@ class Task:
         removes a task collection with a todo_id
         @ param todo_id (int): id of the task we are deleting
         """
-        assert isinstance(todo_id, int)
         self.num_inserted -= 1
         tasks.delete_one({'todo_id' : str(todo_id)})
 
@@ -75,6 +74,16 @@ class Task:
         """
         self.query_count += 1
         return tasks.find({"task_list_id" : task_list_id})
+
+    def get_all_task_with_projid(self, proj_id):
+        """
+        gets all the tasks with the associated project id
+        """
+        self.query_count += 1
+        completed_tasks = list(tasks.find({"proj_id" : str(proj_id)}))
+        for i in completed_tasks:
+            i.pop("_id")
+        return completed_tasks
 
     def get_all(self):
         """

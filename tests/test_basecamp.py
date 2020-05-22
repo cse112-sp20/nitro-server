@@ -1,5 +1,4 @@
-from Basecamp import *
-import Database_Access_Object
+from basecamp import *
 import json
 
 def test_parse_points():

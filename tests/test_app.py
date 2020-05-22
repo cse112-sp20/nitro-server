@@ -19,4 +19,3 @@ def test_no_auth_token(url, status_code):
     assert response.status_code == status_code
     response = client.delete('/clear_completed')
     assert response.status_code == status_code
-    

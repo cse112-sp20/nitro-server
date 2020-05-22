@@ -1,4 +1,4 @@
-![](https://travis-ci.com/cse112-sp20/nitro-server.svg?token=7d5RTErANKPZxRSFsA53&branch=master)
+[![Build Status](https://travis-ci.com/cse112-sp20/nitro-server.svg?token=7d5RTErANKPZxRSFsA53&branch=master)](https://travis-ci.com/cse112-sp20/nitro-server)
 
 [Contribution Guide](https://github.com/cse112-sp20/nitro-server/wiki/Contributing-to-Nitro)
 

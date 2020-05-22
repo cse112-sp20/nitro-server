@@ -274,4 +274,3 @@ def parse_points(title):
     if parsed:
         points += int(parsed.group(1))
     return points
-    

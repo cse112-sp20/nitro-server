@@ -1,15 +1,15 @@
 # pylint: disable=line-too-long
-# pylint: skip-file
 """
 Entry point for application
 """
 import os
 import requests
-from flask import Flask, request, session, redirect, jsonify, url_for, abort
-from dotenv import load_dotenv
-from Basecamp import Basecamp
+from flask import Flask, request, session, redirect, jsonify, url_for
 from flask_cors import CORS, cross_origin
+from dotenv import load_dotenv
+from basecamp import Basecamp
 
+#test
 # Configurations
 APP = Flask(__name__)
 APP.config['SECRET_KEY'] = 'shh'
@@ -29,6 +29,9 @@ TOKEN_BASE = 'https://launchpad.37signals.com/authorization/token?type=web_serve
 @APP.route('/')
 @cross_origin()
 def home():
+    """
+    base route
+    """
     return jsonify({"status": 200})
 
 @APP.route('/login')
@@ -52,7 +55,7 @@ def get_task():
     basecamp = Basecamp(token, ACCOUNT_ID)
     return jsonify(basecamp.json_dump())
 
-@APP.route('/delete', methods=['POST','GET'])
+@APP.route('/delete', methods=['POST', 'GET'])
 def delete_task():
     """
     Delete tasks
@@ -60,18 +63,18 @@ def delete_task():
     token = request.headers.get('Authorization')
     if not token:
         return "no Auth token found", 401
-    
+
     # Get the id of the todo item we want to delete and the id of the project
     todo_id = request.args.get('task')
     project_id = request.args.get('project')
-    
+
     # If either one is not give then return 400
     if not todo_id or not project_id:
         return "did not give task or project id", 400
 
     basecamp = Basecamp(token, ACCOUNT_ID)
     basecamp.delete_task(project_id, todo_id)
-    return "hi" 
+    return "hi"
 
 @APP.route('/complete', methods=['POST', 'GET'])
 @cross_origin()
@@ -109,11 +112,6 @@ def get_token():
     token_response = requests.post(token_url)
     if token_response.status_code == 200:
         token = token_response.json()['access_token'].encode('ascii', 'replace') #The Access token right here
-        """
-        session['AUTH_TOKEN'] = token
-        base_camp = Basecamp(token, ACCOUNT_ID)
-        # base_camp.init_webhook()
-        """
         return jsonify({"Authorization" : token.decode("utf-8")})
     return "bad request"
 
@@ -130,16 +128,14 @@ def clear_completed():
     basecamp.uncomplete_all()
     return "uncompleted"
 
-@APP.route('/task_update_webhook', methods=['POST'])
-@cross_origin()
-def recieve_webhook():
-    print("hello")
-
 @APP.route('/logout')
 @cross_origin()
 def logout():
+    """
+    logs the current user out of the session
+    """
     session.pop('AUTH_TOKEN', None)
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
-    APP.run('0.0.0.0',  port=80, debug=True)
+    APP.run('0.0.0.0', port=80, debug=True)

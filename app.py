@@ -65,7 +65,7 @@ def delete_task():
     """
     Delete tasks
     """
-    token = request.headers.get('Authorization')
+    token = auth.find()[0]["Auth"]
     if not token:
         return "no Auth token found", 401
     

@@ -56,6 +56,7 @@ def get_task():
     return jsonify(basecamp.json_dump())
 
 @APP.route('/delete', methods=['POST', 'GET'])
+@cross_origin()
 def delete_task():
     """
     Delete tasks

@@ -5,3 +5,5 @@ wheel
 requests
 flask_cors
 Flask-Session
+pytest
+coverage

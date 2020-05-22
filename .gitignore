@@ -5,3 +5,5 @@ __pycache__/
 workspace.code-workspace
 *.swp
 /.vscode
+.coverage
+.coverage.*

@@ -55,9 +55,10 @@ def get_task():
     """
     Returns json dump of all of basecamp data
     """
-    token = auth.find()[0]["Auth"]
-    if not token:
-        return "no Auth token found", 401
+    auth_object = auth.find_one()
+    if not auth_object:
+        return "no token found", 400
+    token = auth_object["Auth"]
     basecamp = Basecamp(token, ACCOUNT_ID)
     return jsonify(basecamp.json_dump())
 
@@ -67,9 +68,10 @@ def delete_task():
     """
     Delete tasks
     """
-    token = auth.find()[0]["Auth"]
-    if not token:
-        return "no Auth token found", 401
+    auth_object = auth.find_one()
+    if not auth_object:
+        return "no token found", 400
+    token = auth_object["Auth"]
 
     # Get the id of the todo item we want to delete and the id of the project
     todo_id = request.args.get('task')
@@ -91,9 +93,10 @@ def complete_task():
     @param todo: id of the todo item to be completed
     @param proejct: id of the project todo is located in
     """
-    token = auth.find()[0]["Auth"]
-    if not token:
-        return "no Auth token found", 401
+    auth_object = auth.find_one()
+    if not auth_object:
+        return "no token found", 400
+    token = auth_object["Auth"]
 
     # Get the id of the todo item we want to delete and the id of the project
     todo_id = request.args.get('task')
@@ -132,9 +135,10 @@ def clear_completed():
     Resets the completed tasks from the database
     """
     #token = request.headers.get('Authorization')
-    token = request.headers.get('Authorization')
-    if not token:
-        return "no Auth token found", 401
+    auth_object = auth.find_one()
+    if not auth_object:
+        return "no token found", 400
+    token = auth_object["Auth"]
     basecamp = Basecamp(token, ACCOUNT_ID)
     basecamp.uncomplete_all()
     return "uncompleted"

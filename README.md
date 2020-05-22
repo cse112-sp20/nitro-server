@@ -39,13 +39,15 @@ At current time of writing the backend supports three endpoints
 
 `POST /complete?project=$PROJECT_ID&task=$TASK_ID` will mark the task with `$TASK_ID` from project `$PROJECT_ID` as complete and return a `204` on success
 
+`POST /delete?project=$PROJECT_ID&task=$TASK_ID` will mark the task with project id as deleted without allocating points
+
 `GET /login` will redirect you to basecamp for authentication and then redirect you back
 
-`GET /logout` will log you out and clear your session from the browser
+`DELETE /clear_completed` will remove all completed tasks from the database. Used when you want to reset data
 
 ## API Json Schema
 
-![C5285938-07BB-40B4-AC9E-FF90A1D9C155](https://user-images.githubusercontent.com/39757882/81820185-22c55200-94e5-11ea-879c-66d1c6984e68.jpg)
+![image](https://user-images.githubusercontent.com/39757882/82402699-f5f7ca00-9a11-11ea-9cdd-d14129ff6cde.png)
 
 ## Database Schema
 ![image](https://user-images.githubusercontent.com/39757882/81515583-a0bd0980-92e9-11ea-9ca8-2e9e5d311a35.png)

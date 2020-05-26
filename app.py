@@ -153,4 +153,4 @@ def logout():
     return "logged out"
 
 if __name__ == '__main__':
-    APP.run('0.0.0.0', port=80, debug=True)
+    APP.run('0.0.0.0', port=8000, debug=True)

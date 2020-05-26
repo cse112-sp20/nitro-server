@@ -64,6 +64,9 @@ Basecamp API only supports OAuth 2.0 for authentication so we will be using pyth
 3. Save Token into our cache. We will be using MongoDB
 4. use Auth Token to make requests to basecamp servers
 
+### How to deploy the backend
 
-
-
+```
+ssh -i east2.pem ec2-user@ec2-54-227-1-34.compute-1.amazonaws.com
+cd /var/www/nitro-server/ && gunicorn -b 0.0.0.0:8000 app:APP --daemon
+```

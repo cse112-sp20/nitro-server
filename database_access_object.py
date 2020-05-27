@@ -91,5 +91,5 @@ class Task:
         gets all tasks
         @ return [dict]: List of tasks
         """
-        self.query_count += 1
+        self.query_count += 2
         return tasks.find()

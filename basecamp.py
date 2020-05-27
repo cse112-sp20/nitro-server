@@ -170,6 +170,7 @@ class Basecamp:
         task_json = json.loads(task_res.content)
         task_list_id = task_json['parent']['id']
         points = parse_points(task_json['title'])
+        title = task_json['title']
 
         complete_todo_endpoint = self.complete_endpoint.format(self.acc_id, project_id, todo_id)
         post_response = requests.post(complete_todo_endpoint, headers=self.header)
@@ -177,7 +178,7 @@ class Basecamp:
             raise Exception(str(post_response.status_code))
 
         # inserts the task into the datbase
-        self.tasks.insert_task(self.acc_id, points, todo_id, project_id, task_list_id)
+        self.tasks.insert_task(self.acc_id, points, todo_id, project_id, task_list_id, title)
         return {"success" : "ok"}
 
     def init_webhook(self):

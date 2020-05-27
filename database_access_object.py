@@ -30,7 +30,7 @@ class Task:
         self.num_inserted += 1
         tasks.insert_one(info)
 
-    def insert_task(self, acc_id, points, todo_id, proj_id, task_list_id):
+    def insert_task(self, acc_id, points, todo_id, proj_id, task_list_id, title):
         """
         Inserts a completed todo list into the database
         @ acc_id = the account id the task is associated with
@@ -46,7 +46,8 @@ class Task:
                           "points" : points,
                           "proj_id" : proj_id,
                           "acc_id" : acc_id,
-                          "task_list_id" : task_list_id})
+                          "task_list_id" : task_list_id,
+                          "title" : title})
             return True
         return False
 
@@ -90,5 +91,5 @@ class Task:
         gets all tasks
         @ return [dict]: List of tasks
         """
-        self.query_count += 1
+        self.query_count += 2
         return tasks.find()

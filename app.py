@@ -8,7 +8,7 @@ from flask import Flask, request, redirect, jsonify
 from flask_cors import CORS, cross_origin
 from dotenv import load_dotenv
 from pymongo import MongoClient
-from basecamp import Basecamp
+from basecamp import Basecamp, parse_user_from_json
 
 # Initializing the database access objects
 client = MongoClient("mongodb://0.0.0.0:27017")
@@ -151,6 +151,19 @@ def logout():
     """
     auth.delete_many({})
     return "logged out"
+
+@APP.route('/users')
+@cross_origin()
+def get_user():
+    """
+    Returns user profile dictionary parsed from json dump
+    """
+    auth_object = auth.find_one()
+    if not auth_object:
+        return "no token found", 400
+    token = auth_object["Auth"]
+    basecamp = Basecamp(token, ACCOUNT_ID)
+    return jsonify(parse_user_from_json(basecamp.json_dump()))
 
 if __name__ == '__main__':
     APP.run('0.0.0.0', port=8000, debug=True)

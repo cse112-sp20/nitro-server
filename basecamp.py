@@ -13,8 +13,10 @@ POINTS_REGEXP = "\(\\b(1?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\\b\)"
 # We only want to match the todos with (NITRO)
 NITRO_TODO_REGEXP = "\(NITRO\)"
 
+
 class Basecamp:
     """Object used to interact with basecamp api"""
+
     def __init__(self, auth_token, acc_id):
 
         # Set authentication parameters
@@ -22,7 +24,8 @@ class Basecamp:
         self.header = {"Authorization": "Bearer " + auth_token}
 
         # Requests endpoint
-        self.base_endpoint = "https://3.basecampapi.com/{}/projects.json".format(self.acc_id)
+        self.base_endpoint = "https://3.basecampapi.com/{}/projects.json".format(
+            self.acc_id)
         self.complete_endpoint = 'https://3.basecampapi.com/{}/buckets/{}/todos/{}/completion.json'
         self.task_endpoint = "https://3.basecampapi.com/{}/buckets/{}/todos/{}.json"
         self.delete_todo_endpoint = "https://3.basecampapi.com/" + self.acc_id + "/buckets/{}/" \
@@ -36,7 +39,8 @@ class Basecamp:
         returns: dict
         """
         # Gets the parent object of basecamp to parse
-        project_response = requests.get(self.base_endpoint, headers=self.header)
+        project_response = requests.get(
+            self.base_endpoint, headers=self.header)
 
         project_json = json.loads(project_response.content)
         acc_obj = {}
@@ -54,6 +58,7 @@ class Basecamp:
         for projects in project_json:
             if projects['purpose'] == 'team':
                 team = {}
+                team['assigned_to'] = projects['description']
                 team['name'] = projects['name']
                 team['project_id'] = projects['id']
                 team['todoset_id'] = [item['id']
@@ -62,12 +67,15 @@ class Basecamp:
                 task_list_items = self.get_task_list([item['url']
                                                       for item in projects['dock']
                                                       if item['name'] == 'todoset'][0])
+                print(task_list_items)
+                print("\n\n\n")
                 # Consolidates the tasks into one giant array
                 consolidated_tasks = consolidate_tasks(task_list_items)
                 team['consolidated_tasks'] = consolidated_tasks[0]
                 team['points_required'] = consolidated_tasks[1]
                 team['points_completed'] = consolidated_tasks[2]
-                team['completed_tasks'] = self.tasks.get_all_task_with_projid(team['project_id'])
+                team['completed_tasks'] = self.tasks.get_all_task_with_projid(
+                    team['project_id'])
                 team_res.append(team)
         return team_res
 
@@ -82,7 +90,7 @@ class Basecamp:
         if taskset_response.status_code != 200:
             raise Exception(str(taskset_response.status_code))
 
-        #Each project has multiple todo lists
+        # Each project has multiple todo lists
         result_list = []
         task_set_data = json.loads(taskset_response.content)
 
@@ -105,11 +113,13 @@ class Basecamp:
                 task_list_elem['parent_project'] = task_list['bucket']['name']
                 task_list_elem['task'] = self.get_task(task_list['todos_url'])
                 # Sums up the points of each individual task
-                task_list_elem['points'] = get_points_available(task_list_elem['task'])
+                task_list_elem['points'] = get_points_available(
+                    task_list_elem['task'])
                 result_list.append(task_list_elem)
 
         for task_list in result_list:
-            task_list['points_completed'] = self.get_points_completed(task_list['task_list_id'])
+            task_list['points_completed'] = self.get_points_completed(
+                task_list['task_list_id'])
 
         return result_list
 
@@ -135,7 +145,7 @@ class Basecamp:
             task_item['due_on'] = todo['due_on']
             task_item['assignees'] = todo['assignees']
 
-            #Parse the regular expression to get the number
+            # Parse the regular expression to get the number
             task_item['points'] = 0
 
             # returns "(number)"
@@ -163,7 +173,8 @@ class Basecamp:
         Makes a post request to Basecamp api to complete a todo
         """
         # Get task_list id so that we can store into the database
-        task_endpoint = self.task_endpoint.format(self.acc_id, project_id, todo_id)
+        task_endpoint = self.task_endpoint.format(
+            self.acc_id, project_id, todo_id)
         task_res = requests.get(task_endpoint, headers=self.header)
         if task_res.status_code != 200:
             raise Exception(str(task_res.status_code))
@@ -172,14 +183,17 @@ class Basecamp:
         points = parse_points(task_json['title'])
         title = task_json['title']
 
-        complete_todo_endpoint = self.complete_endpoint.format(self.acc_id, project_id, todo_id)
-        post_response = requests.post(complete_todo_endpoint, headers=self.header)
+        complete_todo_endpoint = self.complete_endpoint.format(
+            self.acc_id, project_id, todo_id)
+        post_response = requests.post(
+            complete_todo_endpoint, headers=self.header)
         if post_response.status_code != 204:
             raise Exception(str(post_response.status_code))
 
         # inserts the task into the datbase
-        self.tasks.insert_task(self.acc_id, points, todo_id, project_id, task_list_id, title)
-        return {"success" : "ok"}
+        self.tasks.insert_task(self.acc_id, points, todo_id,
+                               project_id, task_list_id, title)
+        return {"success": "ok"}
 
     def init_webhook(self):
         """
@@ -198,7 +212,7 @@ class Basecamp:
                 header = self.header
                 header['Content-Type'] = 'application/json'
                 header['User-Agent'] = 'Freshbooks (http://freshbooks.com/contact.php)'
-                param = {'payload_url' : 'http://0.0.0.0:80'}
+                param = {'payload_url': 'http://0.0.0.0:80'}
                 requests.post(webhook_endpoint, headers=header, params=param)
 
     def delete_task(self, project_id, todo_id):
@@ -222,7 +236,8 @@ class Basecamp:
         @ param todo_id (str): id of the todo we want to delete
         @ returns None
         """
-        endpoint = self.complete_endpoint.format(self.acc_id, project_id, todo_id)
+        endpoint = self.complete_endpoint.format(
+            self.acc_id, project_id, todo_id)
         requests.delete(endpoint, headers=self.header)
         self.tasks.remove(int(todo_id))
 
@@ -234,6 +249,32 @@ class Basecamp:
         tasks = self.tasks.get_all()
         for task in tasks:
             self.uncomplete(task['proj_id'], task['todo_id'])
+
+def parse_user_from_json(dump):
+    """
+    parses user profile from json dump
+    returns: dictionary
+    """
+    user_profile = {}
+    for team in dump['teams']:
+        if team['assigned_to']:
+            users = team['assigned_to'].replace(" ", "").split(',')
+            for user in users:
+                if user not in user_profile:
+                    data = {}
+                    data['points_completed'] = team['points_completed']
+                    data['points_required'] = team['points_required']
+                    data['team'] = team['name']
+                    user_profile[user] = data
+                else:
+                    user_profile[user]['points_completed'] += team['points_completed']
+                    user_profile[user]['points_required'] += team['points_required']
+                    user_profile[user]['team'] += ', ' + team['name']
+    for user in user_profile:
+        user_profile[user]['productivity'] = user_profile[user]['points_completed'] / (
+            user_profile[user]['points_completed'] + user_profile[user]['points_required'])
+    return user_profile
+
 
 def consolidate_tasks(task_lists):
     """
@@ -253,6 +294,7 @@ def consolidate_tasks(task_lists):
             tasks_todo.append(tasks)
     return (tasks_todo, points_required, points_completed)
 
+
 def get_points_available(tasks):
     """
     Gets all the points available in a task list
@@ -263,6 +305,7 @@ def get_points_available(tasks):
     for task in tasks:
         points += task['points']
     return points
+
 
 def parse_points(title):
     """

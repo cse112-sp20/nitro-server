@@ -54,6 +54,7 @@ class Basecamp:
         for projects in project_json:
             if projects['purpose'] == 'team':
                 team = {}
+                team['assigned_to'] = projects['description']
                 team['name'] = projects['name']
                 team['project_id'] = projects['id']
                 team['todoset_id'] = [item['id']
@@ -234,6 +235,30 @@ class Basecamp:
         tasks = self.tasks.get_all()
         for task in tasks:
             self.uncomplete(task['proj_id'], task['todo_id'])
+
+    def parse_user_from_json(self):
+        """
+        parses user profile from json dump
+        returns: dictionary
+        """
+        dump = self.json_dump()
+        user_profile = {}
+        for team in dump['teams']:
+            if team['assigned_to']:
+                users = team['assigned_to'].replace(" ", "").split(',')
+                for user in users:
+                    if user not in user_profile:
+                        data = {}
+                        data['points_completed'] = team['points_completed']
+                        data['points_required'] = team['points_required']
+                        data['team'] = team['name']
+                        user_profile[user] = data
+                    else:
+                        user_profile[user]['points_completed'] += team['points_completed']
+                        user_profile[user]['points_required'] += team['points_required']
+                        user_profile[user]['team'] += ', ' + team['name']
+        return user_profile
+
 
 def consolidate_tasks(task_lists):
     """

@@ -152,5 +152,18 @@ def logout():
     auth.delete_many({})
     return "logged out"
 
+@APP.route('/users')
+@cross_origin()
+def get_user():
+    """
+    Returns json dump of all of basecamp data
+    """
+    auth_object = auth.find_one()
+    if not auth_object:
+        return "no token found", 400
+    token = auth_object["Auth"]
+    basecamp = Basecamp(token, ACCOUNT_ID)
+    return jsonify(basecamp.parse_user_from_json())
+
 if __name__ == '__main__':
     APP.run('0.0.0.0', port=8000, debug=True)

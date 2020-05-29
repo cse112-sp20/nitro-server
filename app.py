@@ -163,7 +163,7 @@ def get_user():
         return "no token found", 400
     token = auth_object["Auth"]
     basecamp = Basecamp(token, ACCOUNT_ID)
-    return jsonify(basecamp.parse_user_from_json())
+    return jsonify(basecamp.parse_user_from_json(basecamp.json_dump()))
 
 if __name__ == '__main__':
     APP.run('0.0.0.0', port=8000, debug=True)

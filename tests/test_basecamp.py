@@ -363,5 +363,4 @@ def test_parse_user_from_json():
             "team": "User Profile"
         }
     }
-    bc = Basecamp("", "")
-    assert parsed_users == bc.parse_user_from_json(dump)
+    assert parsed_users == parse_user_from_json(dump)

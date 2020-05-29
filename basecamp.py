@@ -250,30 +250,30 @@ class Basecamp:
         for task in tasks:
             self.uncomplete(task['proj_id'], task['todo_id'])
 
-    def parse_user_from_json(self, dump):
-        """
-        parses user profile from json dump
-        returns: dictionary
-        """
-        user_profile = {}
-        for team in dump['teams']:
-            if team['assigned_to']:
-                users = team['assigned_to'].replace(" ", "").split(',')
-                for user in users:
-                    if user not in user_profile:
-                        data = {}
-                        data['points_completed'] = team['points_completed']
-                        data['points_required'] = team['points_required']
-                        data['team'] = team['name']
-                        user_profile[user] = data
-                    else:
-                        user_profile[user]['points_completed'] += team['points_completed']
-                        user_profile[user]['points_required'] += team['points_required']
-                        user_profile[user]['team'] += ', ' + team['name']
-        for user in user_profile:
-            user_profile[user]['productivity'] = user_profile[user]['points_completed'] / (
-                user_profile[user]['points_completed'] + user_profile[user]['points_required'])
-        return user_profile
+def parse_user_from_json(dump):
+    """
+    parses user profile from json dump
+    returns: dictionary
+    """
+    user_profile = {}
+    for team in dump['teams']:
+        if team['assigned_to']:
+            users = team['assigned_to'].replace(" ", "").split(',')
+            for user in users:
+                if user not in user_profile:
+                    data = {}
+                    data['points_completed'] = team['points_completed']
+                    data['points_required'] = team['points_required']
+                    data['team'] = team['name']
+                    user_profile[user] = data
+                else:
+                    user_profile[user]['points_completed'] += team['points_completed']
+                    user_profile[user]['points_required'] += team['points_required']
+                    user_profile[user]['team'] += ', ' + team['name']
+    for user in user_profile:
+        user_profile[user]['productivity'] = user_profile[user]['points_completed'] / (
+            user_profile[user]['points_completed'] + user_profile[user]['points_required'])
+    return user_profile
 
 
 def consolidate_tasks(task_lists):

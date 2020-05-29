@@ -156,7 +156,7 @@ def logout():
 @cross_origin()
 def get_user():
     """
-    Returns json dump of all of basecamp data
+    Returns user profile dictionary parsed from json dump
     """
     auth_object = auth.find_one()
     if not auth_object:

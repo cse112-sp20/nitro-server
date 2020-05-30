@@ -1,12 +1,24 @@
+env:
+  global:
+    - CC_TEST_REPORTER_ID=aa26101a4ba91e936937191749b41e4cc796b069c1c2f8fc54898adcc3e66985
+
 language: python
+
 python:
   - "3.6"      # current default Python on Travis CI
   - "3.7"
   - "3.8"
+
 # command to install dependencies
 install:
   - pip install codecov
   - pip install -r requirements.txt
+
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
+
 # command to run tests
 script:
   - coverage erase
@@ -14,3 +26,4 @@ script:
 
 after_success:
   - codecov --token=10c3c033-d4a9-4116-8dce-267f87eafd7f
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT

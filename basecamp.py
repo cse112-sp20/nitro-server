@@ -42,11 +42,9 @@ class Basecamp:
         Gets a dump of the json that for the front-end
         returns: dict
         """
-        # Gets the parent object of basecamp to parse
-        project_response = requests.get(
-            self.base_endpoint, headers=self.header)
+        json_byte = self.insert_cache(self.base_endpoint)
+        project_json = json.loads(json_byte)
 
-        project_json = json.loads(project_response.content)
         acc_obj = {}
         acc_obj['account_id'] = self.acc_id
         acc_obj['teams'] = self.get_teams(project_json)

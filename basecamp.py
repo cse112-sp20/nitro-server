@@ -91,13 +91,10 @@ class Basecamp:
         task_set_data = json.loads(json_byte)
         # Get the task_lists from task_set url
         task_list_url = task_set_data['todolists_url']
-        task_list_response = requests.get(task_list_url, headers=self.header)
-
-        if task_list_response.status_code != 200:
-            raise Exception(str(task_list_response.status_code))
+        json_byte = self.insert_cache(task_list_url)
 
         # Add tasklist objects
-        for task_list in json.loads(task_list_response.content):
+        for task_list in json.loads(json_byte):
             # Only take the task_list with the (NITRO) tag in the title
             if re.search(NITRO_TODO_REGEXP, task_list['name']):
                 task_list_elem = {}

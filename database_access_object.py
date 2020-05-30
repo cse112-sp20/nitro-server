@@ -12,6 +12,7 @@ db = client.Basecamp
 #Create collections within db
 tasks = db.Tasks
 users = db.Users
+cache = db.Cache
 
 class Task:
     """

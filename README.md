@@ -1,3 +1,5 @@
+# Nitro Server
+
 [![Build Status](https://travis-ci.com/cse112-sp20/nitro-server.svg?token=7d5RTErANKPZxRSFsA53&branch=master)](https://travis-ci.com/cse112-sp20/nitro-server)
 
 [Code Review Guideline](https://github.com/cse112-sp20/nitro-server/wiki/Code-Reviews)

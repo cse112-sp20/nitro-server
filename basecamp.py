@@ -16,7 +16,6 @@ NITRO_TODO_REGEXP = "\(NITRO\)"
 
 client = MongoClient("mongodb://0.0.0.0:27017")
 db = client.Basecamp
-client = MongoClient("mongodb://0.0.0.0:27017")
 cache = db.Cache
 
 class Basecamp:
@@ -188,7 +187,7 @@ class Basecamp:
         self.tasks.insert_task(self.acc_id, points, todo_id,
                                project_id, task_list_id, title)
         # Clears the cache
-        cache.drop()
+        clear_cache()
         return {"success": "ok"}
 
     def init_webhook(self):
@@ -225,6 +224,9 @@ class Basecamp:
         # removes from the database
         self.tasks.remove(todo_id)
 
+        # Clears the cache
+        clear_cache()
+
     def uncomplete(self, project_id, todo_id):
         """
         Uncompletes a completed task from basecamp and removes it from the database
@@ -255,7 +257,6 @@ class Basecamp:
         # If the cache missed then send a requests
         if not cached_obj:
             res = requests.get(endpoint, headers=self.header)
-            print('cache missed')
             if res.status_code != 200:
                 raise Exception(str(res.status_code))
 
@@ -264,7 +265,6 @@ class Basecamp:
             cache.insert_one({'endpoint': endpoint, 'response': encoded_response})
             json_byte = res.content
         else:
-            print("cached hit")
             # Cache hit so we just return the result
             json_byte = str.encode(cached_obj['response'])
         return json_byte
@@ -335,3 +335,7 @@ def parse_points(title):
     if parsed:
         points += int(parsed.group(1))
     return points
+
+def clear_cache():
+    """clears the cache"""
+    cache.drop()

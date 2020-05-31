@@ -6,6 +6,7 @@ Module to interface with Basecamp api. Used to instantiate endpoints and token
 import json
 import re
 import requests
+from pymongo import MongoClient
 from database_access_object import Task
 
 # Gets the format (100)
@@ -13,10 +14,12 @@ POINTS_REGEXP = "\(\\b(1?[0-9]{1,2}|2[0-4][0-9]|25[0-5])\\b\)"
 # We only want to match the todos with (NITRO)
 NITRO_TODO_REGEXP = "\(NITRO\)"
 
+client = MongoClient("mongodb://0.0.0.0:27017")
+db = client.Basecamp
+cache = db.Cache
 
 class Basecamp:
     """Object used to interact with basecamp api"""
-
     def __init__(self, auth_token, acc_id):
 
         # Set authentication parameters
@@ -38,11 +41,9 @@ class Basecamp:
         Gets a dump of the json that for the front-end
         returns: dict
         """
-        # Gets the parent object of basecamp to parse
-        project_response = requests.get(
-            self.base_endpoint, headers=self.header)
+        json_byte = self.insert_cache(self.base_endpoint)
+        project_json = json.loads(json_byte)
 
-        project_json = json.loads(project_response.content)
         acc_obj = {}
         acc_obj['account_id'] = self.acc_id
         acc_obj['teams'] = self.get_teams(project_json)
@@ -67,8 +68,6 @@ class Basecamp:
                 task_list_items = self.get_task_list([item['url']
                                                       for item in projects['dock']
                                                       if item['name'] == 'todoset'][0])
-                print(task_list_items)
-                print("\n\n\n")
                 # Consolidates the tasks into one giant array
                 consolidated_tasks = consolidate_tasks(task_list_items)
                 team['consolidated_tasks'] = consolidated_tasks[0]
@@ -85,24 +84,16 @@ class Basecamp:
         @ param taskset_endpoint (str): utf-8 string of the taskset endpoint
         @ returns [dict] : List of tasks_lists
         """
-        taskset_response = requests.get(taskset_endpoint, headers=self.header)
-
-        if taskset_response.status_code != 200:
-            raise Exception(str(taskset_response.status_code))
-
+        json_byte = self.insert_cache(taskset_endpoint)
         # Each project has multiple todo lists
         result_list = []
-        task_set_data = json.loads(taskset_response.content)
-
+        task_set_data = json.loads(json_byte)
         # Get the task_lists from task_set url
         task_list_url = task_set_data['todolists_url']
-        task_list_response = requests.get(task_list_url, headers=self.header)
-
-        if task_list_response.status_code != 200:
-            raise Exception(str(task_list_response.status_code))
+        json_byte = self.insert_cache(task_list_url)
 
         # Add tasklist objects
-        for task_list in json.loads(task_list_response.content):
+        for task_list in json.loads(json_byte):
             # Only take the task_list with the (NITRO) tag in the title
             if re.search(NITRO_TODO_REGEXP, task_list['name']):
                 task_list_elem = {}
@@ -131,10 +122,8 @@ class Basecamp:
         """
         # Where we store the todo list
         res = []
-        todo_response = requests.get(todos_url, headers=self.header)
-        if todo_response.status_code != 200:
-            raise Exception(str(todo_response.status_code))
-        todo_list = json.loads(todo_response.content)
+        json_byte = self.insert_cache(todos_url)
+        todo_list = json.loads(json_byte)
         for todo in todo_list:
             self.tasks.remove(todo['id'])
 
@@ -171,13 +160,16 @@ class Basecamp:
     def complete_task(self, project_id, todo_id):
         """
         Makes a post request to Basecamp api to complete a todo
+        Clears the cache
         """
         # Get task_list id so that we can store into the database
         task_endpoint = self.task_endpoint.format(
             self.acc_id, project_id, todo_id)
         task_res = requests.get(task_endpoint, headers=self.header)
+
         if task_res.status_code != 200:
             raise Exception(str(task_res.status_code))
+
         task_json = json.loads(task_res.content)
         task_list_id = task_json['parent']['id']
         points = parse_points(task_json['title'])
@@ -187,12 +179,15 @@ class Basecamp:
             self.acc_id, project_id, todo_id)
         post_response = requests.post(
             complete_todo_endpoint, headers=self.header)
+
         if post_response.status_code != 204:
             raise Exception(str(post_response.status_code))
 
         # inserts the task into the datbase
         self.tasks.insert_task(self.acc_id, points, todo_id,
                                project_id, task_list_id, title)
+        # Clears the cache
+        clear_cache()
         return {"success": "ok"}
 
     def init_webhook(self):
@@ -229,6 +224,9 @@ class Basecamp:
         # removes from the database
         self.tasks.remove(todo_id)
 
+        # Clears the cache
+        clear_cache()
+
     def uncomplete(self, project_id, todo_id):
         """
         Uncompletes a completed task from basecamp and removes it from the database
@@ -249,6 +247,27 @@ class Basecamp:
         tasks = self.tasks.get_all()
         for task in tasks:
             self.uncomplete(task['proj_id'], task['todo_id'])
+
+    def insert_cache(self, endpoint):
+        """
+        Caches the endpoint and the json response as a string
+        """
+        cached_obj = cache.find_one({'endpoint': endpoint})
+
+        # If the cache missed then send a requests
+        if not cached_obj:
+            res = requests.get(endpoint, headers=self.header)
+            if res.status_code != 200:
+                raise Exception(str(res.status_code))
+
+            # Encode the byte as a string to cache into mongodb
+            encoded_response = res.content.decode('utf-8')
+            cache.insert_one({'endpoint': endpoint, 'response': encoded_response})
+            json_byte = res.content
+        else:
+            # Cache hit so we just return the result
+            json_byte = str.encode(cached_obj['response'])
+        return json_byte
 
 def parse_user_from_json(dump):
     """
@@ -275,7 +294,6 @@ def parse_user_from_json(dump):
             user_profile[user]['points_completed'] + user_profile[user]['points_required'])
     return user_profile
 
-
 def consolidate_tasks(task_lists):
     """
     Helper method to flatten the multi level task-list into a single array of tasks
@@ -294,7 +312,6 @@ def consolidate_tasks(task_lists):
             tasks_todo.append(tasks)
     return (tasks_todo, points_required, points_completed)
 
-
 def get_points_available(tasks):
     """
     Gets all the points available in a task list
@@ -305,7 +322,6 @@ def get_points_available(tasks):
     for task in tasks:
         points += task['points']
     return points
-
 
 def parse_points(title):
     """
@@ -319,3 +335,7 @@ def parse_points(title):
     if parsed:
         points += int(parsed.group(1))
     return points
+
+def clear_cache():
+    """clears the cache"""
+    cache.drop()

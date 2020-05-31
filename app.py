@@ -125,7 +125,8 @@ def get_token():
         token = token_response.json()['access_token'].encode('ascii', 'replace') #The Access token right here
         auth.delete_many({})
         auth.insert_one({"Auth" : token.decode("utf-8")})
-        return "logged in"
+        basecamp = Basecamp(token.decode("utf-8"), ACCOUNT_ID)
+        return redirect("https://3.basecamp.com/" + str(basecamp.acc_id))
     return "bad request", 400
 
 @APP.route('/clear_completed', methods=['DELETE'])

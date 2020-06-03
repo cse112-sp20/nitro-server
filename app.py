@@ -129,20 +129,21 @@ def get_token():
         return redirect("https://3.basecamp.com/" + str(basecamp.acc_id))
     return "bad request", 400
 
-@APP.route('/clear_completed', methods=['DELETE'])
-@cross_origin()
-def clear_completed():
-    """
-    Resets the completed tasks from the database
-    """
-    #token = request.headers.get('Authorization')
-    auth_object = auth.find_one()
-    if not auth_object:
-        return "no token found", 400
-    token = auth_object["Auth"]
-    basecamp = Basecamp(token, ACCOUNT_ID)
-    # basecamp.uncomplete_all() # TODO Secure or remove this endpoint
-    return "uncompleted"
+# TODO Secure or remove this endpoint
+# @APP.route('/clear_completed', methods=['DELETE'])
+# @cross_origin()
+# def clear_completed():
+#     """
+#     Resets the completed tasks from the database
+#     """
+#     #token = request.headers.get('Authorization')
+#     auth_object = auth.find_one()
+#     if not auth_object:
+#         return "no token found", 400
+#     token = auth_object["Auth"]
+#     basecamp = Basecamp(token, ACCOUNT_ID)
+#     basecamp.uncomplete_all()
+#     return "uncompleted"
 
 @APP.route('/logout')
 @cross_origin()

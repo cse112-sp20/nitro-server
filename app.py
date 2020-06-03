@@ -141,7 +141,7 @@ def clear_completed():
         return "no token found", 400
     token = auth_object["Auth"]
     basecamp = Basecamp(token, ACCOUNT_ID)
-    basecamp.uncomplete_all()
+    # basecamp.uncomplete_all() # TODO Secure or remove this endpoint
     return "uncompleted"
 
 @APP.route('/logout')

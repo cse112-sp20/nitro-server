@@ -14,3 +14,4 @@
 
 [API Endpoints](https://github.com/cse112-sp20/nitro-server/wiki/API-Endpoints)
 
+[About the team](https://team4-racecar.github.io/)

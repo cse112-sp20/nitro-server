@@ -18,7 +18,7 @@
 
 ## Getting Started Guide
 
-### How to setup git
+### How to setup git 
 If you’ve never used git or github before, here is the [tutorial](https://help.github.com/en/github/getting-started-with-github/set-up-git) on how to download, install and configure git.
 
 Clone our repository into a local directory. Open a terminal/shell and go to a convenient directory and then type:
